@@ -111,11 +111,18 @@ while True:
         img_warped_gray = cv2.cvtColor(img_warped, cv2.COLOR_BGR2GRAY)
         img_warped_blur = cv2.GaussianBlur(img_warped_gray, (5, 5), 1)
 
-        img_warped_canny = cv2.Canny(img_warped_blur, 50, 50)
+        img_warped_canny = cv2.Canny(img_warped_blur, 10, 150)
 
         kernel = np.ones((3, 3))
         img_warped_dialated = cv2.dilate(img_warped_canny, kernel, iterations=3)
         img_warped_thresh = cv2.erode(img_warped_dialated, kernel, iterations=2)
+
+        # img_warped_thresh = cv2.morphologyEx(img_warped_dialated, cv2.MORPH_CLOSE, kernel)
+
+        # cv2.imshow("Image warped canny", img_warped_canny)
+        # cv2.imshow("Image warped dialated", img_warped_dialated)
+        # cv2.imshow("Image warped thresh", img_warped_thresh)
+        # cv2.waitKey(1)
 
         # Find all contours, with no filter on the number of points
         _, objects_found = cvzone.findContours(img_warped, img_warped_thresh, minArea=1300)
@@ -128,7 +135,10 @@ while True:
                 box_points = cv2.boxPoints(rect)
                 box_points = np.intp(box_points)
 
-                print(box_points)
+                obj_px_area = obj['area']
+
+                # print(box_points)
+                print(obj['area'])
 
                 cv2.drawContours(img_display, [box_points], 0, (0, 255, 0), 2)
 
@@ -150,6 +160,10 @@ while True:
                 midpoint2 = ((p2[0] + p3[0]) // 2, (p2[1] + p3[1]) // 2)
                 cvzone.putTextRect(img_display, f'{width_cm} cm', (midpoint2[0] + 15, midpoint2[1]),
                                    scale=1.5, thickness=2, colorR=(255, 0, 0), offset=5)
+
+                cvzone.putTextRect(imgOverlay, f'px area: {obj_px_area}', (midpoint2[0] + 15, midpoint2[1]),
+                                   scale=1.5, thickness=2, colorR=(255, 0, 0), offset=5)
+
 
             # display the measurements
             # cvzone.putTextRect(img_display, f'{width_cm} cm', (box_points[1][0], box_points[1][1] - 20),
